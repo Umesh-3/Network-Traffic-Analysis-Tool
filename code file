@@ -1,0 +1,43 @@
+#install libraries used
+!pip install scapy
+!pip install pandas
+!pip install matplotlib
+
+#import libraries used
+import scapy.all as scapy
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Define the network interface to sniff
+interface = "eth0"
+
+# Define the number of packets to sniff
+num_packets = 100
+
+# Use scapy to sniff packets
+packets = scapy.sniff(iface=interface, count=num_packets)
+
+# Creating a pandas DataFrame to store packet information
+packet_data = []
+
+for packet in packets:
+    packet_info = {
+        "src_ip": packet[scapy.IP].src,
+        "dst_ip": packet[scapy.IP].dst,
+        "protocol": packet[scapy.IP].proto,
+        "length": packet[scapy.IP].len
+    }
+    packet_data.append(packet_info)
+
+df = pd.DataFrame(packet_data)
+
+# Get the top 10 source IP addresses and their packet counts
+top_src_ips = df["src_ip"].value_counts().head(10)
+
+# Create a bar chart
+plt.figure(figsize=(10, 6))
+plt.bar(top_src_ips.index, top_src_ips.values)
+plt.xlabel("Source IP Address")
+plt.ylabel("Packet Count")
+plt.title("Top 10 Source IP Addresses")
+plt.show()
